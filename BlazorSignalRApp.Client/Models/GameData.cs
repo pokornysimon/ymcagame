@@ -2,6 +2,7 @@ namespace BlazorSignalRApp.Client.Models;
 
 public class GameData
 {
+    public DateTime LastUpdated { get; set; } = DateTime.Now;
     public List<Kingdom> Kingdoms { get; set; } =
     [
         new Kingdom("Synové světla"),

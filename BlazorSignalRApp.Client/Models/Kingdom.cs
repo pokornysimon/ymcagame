@@ -14,10 +14,10 @@ public class Kingdom(string kingdomName)
         // new Resource { Name = "Šupiny", Amount = 0 },
     ];
 
-    public void UpdateResource(Resource resource)
+    public void UpdateResource(string resourceName, int amount)
     {
-        var r = this.Resources.First(res => res.Name == resource.Name);
-        r.Amount += resource.Amount;
+        var r = this.Resources.First(res => res.Name == resourceName);
+        r.Amount += amount;
     }
 
     public void RecalculateResourceValues()

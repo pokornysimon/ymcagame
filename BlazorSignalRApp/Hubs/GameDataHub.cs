@@ -7,14 +7,14 @@ namespace BlazorSignalRApp.Hubs;
 
 internal class GameDataHub(GameDataService gameDataService) : Hub
 {
-    public async Task UpdateGameData(GameData  gameData)
+    public async Task UpdateGameData(GameDataUpdateContract  updateContract)
     {
-        gameDataService.GameData = gameData;
-        foreach (var kingdom in gameData.Kingdoms)
-        {
-            kingdom.RecalculateResourceValues();
-        }
-        await Clients.All.SendAsync("NewGameData", gameData);
+        gameDataService.GameData.LastUpdated = DateTime.Now;
+        var kingdom = gameDataService.GameData.Kingdoms.First(k => k.KingdomName == updateContract.KingdomName);
+        kingdom.UpdateResource(updateContract.ResourceName, updateContract.Amount);
+        kingdom.RecalculateResourceValues();
+        
+        await Clients.All.SendAsync("NewGameData", gameDataService.GameData);
     }
 
     public async Task Sync()

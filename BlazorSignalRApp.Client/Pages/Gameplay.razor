@@ -6,109 +6,115 @@
 @implements IAsyncDisposable
 
 <PageTitle>Přehled království</PageTitle>
-<h3>Výběr království</h3>
-<div class="form-group">
-    <label>
-        Moje království:
-        <select name="Království" id="kingdomselect" @bind="_selectedKingdomIndex">
-            @foreach (var kingdom in _gameData.Kingdoms)
-            {
-                <option value="@_gameData.Kingdoms.IndexOf(kingdom)">@kingdom.KingdomName</option>
-            }
-        </select>
-    </label>
-</div>
 
-<hr/>
+@if (IsConnected)
+{
+    <h3>Výběr království</h3>
+    <div class="form-group">
+        <label>
+            Moje království:
+            <select name="Království" id="kingdomselect" @bind="_selectedKingdomIndex">
+                @foreach (var kingdom in _gameData.Kingdoms)
+                {
+                    <option value="@_gameData.Kingdoms.IndexOf(kingdom)">@kingdom.KingdomName</option>
+                }
+            </select>
+        </label>
+    </div>
 
-<h3>Cena surovin</h3>
-<table>
-    <tr>
-        <td colspan="2" rowspan="1"></td>
-        <td colspan="6">VYDÁM</td>
-    </tr>
-    <tr>
-        
-        <td rowspan="6">DOSTANU</td>
-        <td></td>
-        @foreach (var resource in _currentKingdom.Resources)
-        {
-            <td>@resource.Name</td>
-        }
-    </tr>
+    <hr/>
 
-    @foreach (var wantResource in _currentKingdom.Resources)
-    {
+    <h3>Cena surovin</h3>
+    <table>
         <tr>
-            
-            <td><b>@wantResource.Name</b> <span style="font-size: 10px">[@wantResource.Value]</span></td>
-            @foreach (var offerResource in _currentKingdom.Resources)
+            <td colspan="2" rowspan="1"></td>
+            <td colspan="6">VYDÁM</td>
+        </tr>
+        <tr>
+
+            <td rowspan="6">DOSTANU</td>
+            <td></td>
+            @foreach (var resource in _currentKingdom.Resources)
             {
-                if (wantResource.Name != offerResource.Name)
+                <td>@resource.Name</td>
+            }
+        </tr>
+
+        @foreach (var wantResource in _currentKingdom.Resources)
+        {
+            <tr>
+
+                <td><b>@wantResource.Name</b> <span style="font-size: 10px">[@wantResource.Value]</span></td>
+                @foreach (var offerResource in _currentKingdom.Resources)
+                {
+                    if (wantResource.Name != offerResource.Name)
+                    {
+                        <td>
+                            @if (offerResource.Amount != 0 && offerResource.Value != 0)
+                            {
+                                @_currentKingdom.GetExchangeAmount(wantResource.Name, offerResource.Name)
+                            }
+                            else
+                            {
+                                <span>0</span>
+                            }
+                        </td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+                }
+            </tr>
+        }
+    </table>
+
+    <hr/>
+
+    <h3>Správa skladu</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>
+                Království
+            </th>
+            @foreach (var resource in _gameData.Kingdoms[0].Resources)
+            {
+                <th>
+                    @resource.Name
+                </th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var kingdom in _gameData.Kingdoms)
+        {
+            <tr>
+                <td>@kingdom.KingdomName</td>
+                @foreach (var resource in kingdom.Resources)
                 {
                     <td>
-                        @if (offerResource.Amount != 0 && offerResource.Value != 0)
+                        @if (_gameData.Kingdoms.IndexOf(kingdom) == _selectedKingdomIndex)
                         {
-                            @_currentKingdom.GetExchangeAmount(wantResource.Name, offerResource.Name)
+                            <button
+                                @onclick="() => UpdateKingdom(_gameData.Kingdoms.IndexOf(kingdom), resource.Name, -1)">-
+                            </button>
                         }
-                        else
+                        @resource.Amount
+                        @if (_gameData.Kingdoms.IndexOf(kingdom) == _selectedKingdomIndex)
                         {
-                            <span>0</span>
+                            <button
+                                @onclick="() => UpdateKingdom(_gameData.Kingdoms.IndexOf(kingdom), resource.Name, +1)">+
+                            </button>
                         }
                     </td>
                 }
-                else
-                {
-                    <td></td>
-                }
-            }
-        </tr>
-    }
-</table>
 
-<hr/>
-
-<h3>Správa skladu</h3>
-<table>
-    <thead>
-    <tr>
-        <th>
-            Království
-        </th>
-        @foreach (var resource in _gameData.Kingdoms[0].Resources)
-        {
-            <th>
-                @resource.Name
-            </th>
+            </tr>
         }
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var kingdom in _gameData.Kingdoms)
-    {
-        <tr>
-            <td>@kingdom.KingdomName</td>
-            @foreach (var resource in kingdom.Resources)
-            {
-                <td>
-                    @if (_gameData.Kingdoms.IndexOf(kingdom) == _selectedKingdomIndex)
-                    {
-                        <button @onclick="() => UpdateKingdom(_gameData.Kingdoms.IndexOf(kingdom), resource.Name, -1)">-
-                        </button>
-                    }
-                    @resource.Amount
-                    @if (_gameData.Kingdoms.IndexOf(kingdom) == _selectedKingdomIndex)
-                    {
-                        <button @onclick="() => UpdateKingdom(_gameData.Kingdoms.IndexOf(kingdom), resource.Name, +1)">+
-                        </button>
-                    }
-                </td>
-            }
-
-        </tr>
-    }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
 
 @code {
     private int _selectedKingdomIndex = 0;
@@ -144,12 +150,16 @@
 
     private async Task UpdateKingdom(int kingdomIndex, string resourceName, int amount)
     {
-        var resourceIdx = _gameData.Kingdoms[kingdomIndex].Resources.FindIndex(r => r.Name == resourceName);
-        _gameData.Kingdoms[kingdomIndex].Resources[resourceIdx].Amount += amount;
-
+        var updateContract = new GameDataUpdateContract
+        {
+            KingdomName = _currentKingdom.KingdomName,
+            ResourceName = resourceName,
+            Amount = amount
+        };
+        
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("UpdateGameData", _gameData);
+            await hubConnection.SendAsync("UpdateGameData", updateContract);
         }
     }
 
