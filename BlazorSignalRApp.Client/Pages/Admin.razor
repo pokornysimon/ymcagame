@@ -28,7 +28,7 @@
         @foreach (var kingdom in _gameData.Kingdoms)
         {
             <tr>
-                <td>@kingdom.KingdomName</td>
+                <td>@kingdom.KingdomName <span style="font-size: x-small">@kingdom.Resources.First(r => r.HomeResource).Name</span></td>
                 @foreach (var resource in kingdom.Resources)
                 {
                     <td>
