@@ -5,14 +5,7 @@ public class Kingdom(string kingdomName)
     private int _totalAmount = 100;
     public string KingdomName { get; } = kingdomName;
 
-    public List<Resource> Resources { get; set; } =
-    [
-        new Resource { Name = "Oheň", Amount = 0 },
-        new Resource { Name = "Zlato", Amount = 0 },
-        new Resource { Name = "Obilí", Amount = 0 },
-        new Resource { Name = "Mléko", Amount = 0 },
-        // new Resource { Name = "Šupiny", Amount = 0 },
-    ];
+    public List<Resource> Resources { get; set; } 
 
     public void UpdateResource(string resourceName, int amount)
     {
@@ -28,6 +21,11 @@ public class Kingdom(string kingdomName)
         }
     }
 
+    // public int GetExchangeAmount_new(string offeredResourceName, string targetResourceName)
+    // {
+    //     RecalculateResourceValues();
+    // }
+    
     public int GetExchangeAmount(string offeredResourceName, string targetResourceName)
     {
         RecalculateResourceValues();
@@ -41,8 +39,8 @@ public class Kingdom(string kingdomName)
         if (target.Amount == 0) // Cílová surovina není dostupná
             return 0;
 
-        if (offered.Amount == 0) // Nabízená surovina není dostupná
-            return 0;
+        if (offered.Amount < 8 ) // Nabízená surovina není dostupná
+            return 1;
 
         // Výpočet poměru hodnot
         double ratio = (double)offered.Value / target.Value;

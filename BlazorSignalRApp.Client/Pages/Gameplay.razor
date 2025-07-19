@@ -7,7 +7,7 @@
 
 <PageTitle>Přehled království</PageTitle>
 
-@if (IsConnected)
+@if (IsConnected && _gameData.LastUpdated > DateTime.Today)
 {
     <h3>Výběr království</h3>
     <div class="form-group">
@@ -71,49 +71,37 @@
 
     <hr/>
 
-    <h3>Správa skladu</h3>
+    <h3>Můj sklad</h3>
+    
     <table>
-        <thead>
+        @foreach (var resource in _currentKingdom.Resources)
+        {           
         <tr>
-            <th>
-                Království
-            </th>
-            @foreach (var resource in _gameData.Kingdoms[0].Resources)
-            {
-                <th>
-                    @resource.Name
-                </th>
-            }
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var kingdom in _gameData.Kingdoms)
-        {
-            <tr>
-                <td>@kingdom.KingdomName</td>
-                @foreach (var resource in kingdom.Resources)
-                {
-                    <td>
-                        @if (_gameData.Kingdoms.IndexOf(kingdom) == _selectedKingdomIndex)
-                        {
-                            <button
-                                @onclick="() => UpdateKingdom(_gameData.Kingdoms.IndexOf(kingdom), resource.Name, -1)">-
-                            </button>
-                        }
-                        @resource.Amount
-                        @if (_gameData.Kingdoms.IndexOf(kingdom) == _selectedKingdomIndex)
-                        {
-                            <button
-                                @onclick="() => UpdateKingdom(_gameData.Kingdoms.IndexOf(kingdom), resource.Name, +1)">+
-                            </button>
-                        }
-                    </td>
-                }
+            <td>@resource.Name</td>
+            <td>
+                <button
+                    @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, -1)">-1
+                </button>
+                @resource.Amount
+                <button
+                    @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, +1)">+1
+                </button>
+            </td>
 
-            </tr>
+        </tr>       
         }
-        </tbody>
     </table>
+    
+   
+    <hr />
+    
+    <p>Poslendí změna: @_gameData.LastUpdated.ToLongTimeString()</p>
+}
+else
+{
+    
+
+    <p>Chvilku strpení - načítám data :)</p>
 }
 
 @code {
@@ -150,6 +138,12 @@
 
     private async Task UpdateKingdom(int kingdomIndex, string resourceName, int amount)
     {
+        // Make sure we don't set the resource to negative numbers
+        if (_currentKingdom.Resources.First(r => r.Name == resourceName).Amount == 0 && amount == -1)
+        {
+            return;
+        }
+        
         var updateContract = new GameDataUpdateContract
         {
             KingdomName = _currentKingdom.KingdomName,

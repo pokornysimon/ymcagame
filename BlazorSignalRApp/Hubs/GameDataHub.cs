@@ -17,8 +17,16 @@ internal class GameDataHub(GameDataService gameDataService) : Hub
         await Clients.All.SendAsync("NewGameData", gameDataService.GameData);
     }
 
+    public async Task ResetGame()
+    {
+        gameDataService.GameData = new GameData();
+        gameDataService.GameData.LastUpdated = DateTime.Now;
+        await Clients.All.SendAsync("NewGameData", gameDataService.GameData);
+    }
+
     public async Task Sync()
     {
+        gameDataService.GameData.LastUpdated = DateTime.Now;
         await Clients.All.SendAsync("NewGameData", gameDataService.GameData);
     }
 }
