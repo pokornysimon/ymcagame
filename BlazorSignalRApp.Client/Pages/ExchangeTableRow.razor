@@ -11,7 +11,7 @@
         }
         else
         {
-            <td>@(Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount) * -1))x</td>
+            <td>@(Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount) * -1)x</td>
             <td>@OfferedResource.Name</td>
         }
 
@@ -29,12 +29,17 @@
         <td>
             <button
                 @onclick="async () => { 
-                                    if (Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount) > 0) {
-                                        await UpdateKingdom(OfferedResource.Name, 1);
-                                        await UpdateKingdom(TargetResource.Name, Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount)*-1); 
-                                    }else { 
-                                        await UpdateKingdom(OfferedResource.Name, Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount)*-1);
-                                        await UpdateKingdom(TargetResource.Name, -1); 
+                Parent._lastTransactions.Clear();
+                    if (Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount) > 0) {
+                        await UpdateKingdom(OfferedResource.Name, 1);
+                        await UpdateKingdom(TargetResource.Name, Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount)*-1);
+                        Parent._lastTransactions.Add(OfferedResource.Name, 1);
+                        Parent._lastTransactions.Add(TargetResource.Name, Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount)*-1); 
+                    }else { 
+                        await UpdateKingdom(OfferedResource.Name, Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount)*-1);
+                        await UpdateKingdom(TargetResource.Name, -1); 
+                        Parent._lastTransactions.Add(OfferedResource.Name, Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount)*-1);
+                        Parent._lastTransactions.Add(TargetResource.Name, -1);
                                     } }"
             >Prodat
             </button>

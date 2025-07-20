@@ -126,6 +126,15 @@
         }
     </table>
 
+    <hr/>
+    
+    <button @onclick="RevertTransaction">Vrátit poslední transakci</button>
+    <ul>
+        @foreach (var transaction in _lastTransactions)
+        {
+            <li>@transaction.Key: @transaction.Value</li>
+        }
+    </ul>
 
     <hr/>
 
@@ -144,6 +153,7 @@ else
     public GameData _gameData = new GameData();
     private string? userInput;
     private string? messageInput;
+    public Dictionary<string, int> _lastTransactions = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,6 +169,26 @@ else
 
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("Sync");
+    }
+
+    private async Task RevertTransaction()
+    {
+        foreach (var transaction in _lastTransactions)
+        {
+            var updateContract = new GameDataUpdateContract
+            {
+                KingdomName = _currentKingdom.KingdomName,
+                ResourceName = transaction.Key,
+                Amount = transaction.Value * -1
+            };
+
+            if (hubConnection is not null)
+            {
+                await hubConnection.SendAsync("UpdateGameData", updateContract);
+            }
+            
+        }
+        _lastTransactions.Clear();
     }
 
     private async Task Send()
