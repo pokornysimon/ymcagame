@@ -38,17 +38,17 @@
 
         <tr
             class="no-border-right"
-            style=@(_currentKingdom.GetHomeResource().Amount <= Resource.HomeResourceAmountFreeMoreThan ? "background-color: lightcoral" : "background-color: lightgreen")
+            style=@(_currentKingdom.GetHomeResource().Amount <= _gameData.HomeResourceAmountFreeMoreThan ? "background-color: lightcoral" : "background-color: lightgreen")
         >
             <td colspan="2">NIC!</td>
             <td> -></td>
-            <td>1x</td>
+            <td>@(_gameData.HomeResourceAmountFree)x</td>
             <td>
                 @_currentKingdom.GetHomeResource().Name
             </td>
             <td>
-                <button @onclick="() => UpdateKingdom(_currentKingdom.GetHomeResource().Name, -1)"
-                        disabled=@(_currentKingdom.GetHomeResource().Amount <= Resource.HomeResourceAmountFreeMoreThan)>
+                <button @onclick="() => UpdateKingdom(_currentKingdom.GetHomeResource().Name, (-1)*_gameData.HomeResourceAmountFree)"
+                        disabled=@(_currentKingdom.GetHomeResource().Amount <= _gameData.HomeResourceAmountFreeMoreThan)>
                     Vydat zdarma
                 </button>
             </td>
@@ -66,7 +66,8 @@
                     <ExchangeTableRow CurrentKingdom="_currentKingdom"
                                       OfferedResource="offeredResource"
                                       Parent="this"
-                                      TargetResource="targetResource"/>
+                                      TargetResource="targetResource"
+                                      />
                 }
             }
         }
@@ -140,7 +141,7 @@ else
     private int _selectedKingdomIndex = 0;
     private Kingdom _currentKingdom => _gameData.Kingdoms[_selectedKingdomIndex];
     private HubConnection? hubConnection;
-    private GameData _gameData = new GameData();
+    public GameData _gameData = new GameData();
     private string? userInput;
     private string? messageInput;
 

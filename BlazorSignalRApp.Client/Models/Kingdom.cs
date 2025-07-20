@@ -9,7 +9,8 @@ public class Kingdom(string kingdomName)
     public void UpdateResource(string resourceName, int amount)
     {
         var r = this.Resources.First(res => res.Name == resourceName);
-        r.Amount += amount;
+        if (r.Amount + amount > 0)
+            r.Amount += amount;
     }
 
     public Resource GetHomeResource()

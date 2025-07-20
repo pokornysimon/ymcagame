@@ -78,29 +78,50 @@
         </tr>
         <tr>
             <td>
-                <button>-</button>
-                <span>@Resource.ExRateLowAmount</span>
-                <button>+</button>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_C1, -1)">-</button>
+                <span>@_gameData.ExRateLowAmount</span>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_C1, 1)">+</button>
             </td>
             <td>
-                <button>-</button>
-                <span>@Resource.ExRateLow</span>
-                <button>+</button>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_R1, -1)">-</button>
+                <span>@_gameData.ExRateLow</span>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_R1, 1)">+</button>
             </td>
             <td>
-                <button>-</button>
-                <span>@Resource.ExRateMedAmount</span>
-                <button>+</button>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_C2, -1)">-</button>
+                <span>@_gameData.ExRateMedAmount</span>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_C2, 1)">+</button>
             </td>
             <td>
-                <button>-</button>
-                <span>@Resource.ExRateMed</span>
-                <button>+</button>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_R2, -1)">-</button>
+                <span>@_gameData.ExRateMed</span>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_R2, 1)">+</button>
             </td>
             <td>
-                <button>-</button>
-                <span>@Resource.ExRateHighAmount</span>
-                <button>+</button>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_C3, -1)">-</button>
+                <span>@_gameData.ExRateHighAmount</span>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_C3, 1)">+</button>
+            </td>
+        </tr>
+    </table>
+    
+    <hr />
+    
+    <table>
+        <tr>
+            <th>Min. zásoba pro zdarma</th>
+            <th>Množství zdarma</th>
+        </tr>
+        <tr>
+            <td>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_F1, -1)">-</button>
+                <span>@_gameData.HomeResourceAmountFreeMoreThan</span>
+                <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_F1, 1)">+</button>
+            </td>
+            <td>
+                    <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_F2, -1)">-</button>
+                    <span>@_gameData.HomeResourceAmountFree</span>
+                    <button @onclick="() => UpdateResource(UpdateResourceParameter.UPDATE_F2, 1)">+</button>
             </td>
         </tr>
     </table>
@@ -152,6 +173,14 @@
         }
     }
 
+    private async Task UpdateResource(UpdateResourceParameter parameter, int amount)
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("UpdateResourceParameters", parameter, amount);
+        }
+    }
+    
     private async Task UpdateKingdom(int kingdomIndex, string resourceName, int amount)
     {
         var kingdom = _gameData.Kingdoms[kingdomIndex];
