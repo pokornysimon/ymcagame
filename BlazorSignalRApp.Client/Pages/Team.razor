@@ -1,0 +1,116 @@
+@page "/team"
+@rendermode InteractiveWebAssembly
+@using BlazorSignalRApp.Client.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<PageTitle>Týmová stránka</PageTitle>
+
+@if (IsConnected && _gameData.LastUpdated > DateTime.Today)
+{
+    <h3>Přehled království</h3>
+    <table>
+        <tr>
+            <th>
+                Království
+            </th>
+            @foreach (var resource in _gameData.Kingdoms[0].Resources)
+            {
+                <th>
+                    @resource.Name
+                </th>
+            }
+        </tr>
+        @foreach (var kingdom in _gameData.Kingdoms)
+        {
+            <tr>
+                <td>@kingdom.KingdomName <span
+                        style="font-size: x-small">@kingdom.Resources.First(r => r.HomeResource).Name zdarma</span></td>
+                @foreach (var resource in kingdom.Resources)
+                {
+                    <td>
+                        @resource.Amount
+                    </td>
+                }
+
+            </tr>
+        }
+    </table>
+    <hr/>
+
+    <p>Poslendí změna: @_gameData.LastUpdated.ToLongTimeString()</p>
+}
+
+@code {
+    private HubConnection? hubConnection;
+    private GameData _gameData = new GameData();
+    private string? userInput;
+    private string? messageInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/gamedatahub"))
+            .Build();
+
+        hubConnection.On<GameData>("NewGameData", (gameData) =>
+        {
+            _gameData = gameData;
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("Sync");
+    }
+
+    private async Task Send()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("UpdateGameData", _gameData);
+        }
+    }
+
+    private async Task ResetGame()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("ResetGame");
+        }
+    }
+
+    private async Task UpdateKingdom(int kingdomIndex, string resourceName, int amount)
+    {
+        var kingdom = _gameData.Kingdoms[kingdomIndex];
+        // Make sure we don't set the resource to negative numbers
+        if (kingdom.Resources.First(r => r.Name == resourceName).Amount == 0 && amount == -1)
+        {
+            return;
+        }
+
+        var updateContract = new GameDataUpdateContract
+        {
+            KingdomName = kingdom.KingdomName,
+            ResourceName = resourceName,
+            Amount = amount
+        };
+
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("UpdateGameData", updateContract);
+        }
+    }
+
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+}

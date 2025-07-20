@@ -1,0 +1,59 @@
+@using BlazorSignalRApp.Client.Models
+@using BlazorSignalRApp.Client.Pages
+
+@if (OfferedResource.Name != TargetResource.Name && OfferedResource.GetExchangeRate(TargetResource) != 0)
+{
+    <tr style=@(OfferedResource.GetExchangeRate(TargetResource) > 0 ? "background-color: lightgreen" : "background-color: lightcoral")>
+        @if (OfferedResource.GetExchangeRate(TargetResource) > 0)
+        {
+            <td>1x</td>
+            <td>@OfferedResource.Name</td>
+        }
+        else
+        {
+            <td>@(OfferedResource.GetExchangeRate(TargetResource) * -1)x</td>
+            <td>@OfferedResource.Name</td>
+        }
+
+        <td>-></td>
+        @if (OfferedResource.GetExchangeRate(TargetResource) > 0)
+        {
+            <td>@(OfferedResource.GetExchangeRate(TargetResource))x</td>
+            <td>@TargetResource.Name</td>
+        }
+        else
+        {
+            <td>1x</td>
+            <td>@TargetResource.Name</td>
+        }
+        <td>
+            <button
+                @onclick="async () => { 
+                                    if (OfferedResource.GetExchangeRate(TargetResource) > 0) {
+                                        await UpdateKingdom(OfferedResource.Name, 1);
+                                        await UpdateKingdom(TargetResource.Name, OfferedResource.GetExchangeRate(TargetResource)*-1); 
+                                    }else { 
+                                        await UpdateKingdom(OfferedResource.Name, OfferedResource.GetExchangeRate(TargetResource)*-1);
+                                        await UpdateKingdom(TargetResource.Name, -1); 
+                                    } }"
+            >Prodat
+            </button>
+        </td>
+    </tr>
+}
+
+
+
+
+@code {
+    [Parameter] public Kingdom CurrentKingdom { get; set; }
+    [Parameter] public Resource OfferedResource { get; set; }
+    [Parameter] public Resource TargetResource { get; set; }
+    [Parameter] public Gameplay Parent { get; set; }
+
+    private async Task UpdateKingdom(string resourceName, int amount)
+    {
+        await Parent.UpdateKingdom(resourceName, amount);
+    }
+
+}

@@ -13,7 +13,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -42,9 +42,9 @@ h1:focus {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
@@ -59,7 +59,21 @@ h1:focus {
     text-align: start;
 }
 
-table, td, th {
-    border: black solid 1px;
+.normal-table > table, .normal-table > tr > td, .normal-table > tr > th {
     border-collapse: collapse;
+    border: grey solid 1px;
+    padding: 5px;
+    text-align: center;
+}
+
+.fancy-table, .fancy-table > tr > td, .fancy-table > tr > th {
+    border-top: grey solid 1px;
+    border-bottom: grey solid 1px;
+    border-collapse: collapse;
+    padding: 5px;
+    text-align: center;
+}
+
+button {
+    margin: 5px;
 }

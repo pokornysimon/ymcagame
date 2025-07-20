@@ -25,28 +25,26 @@
     <hr/>
 
     <h3>Obchodní tabulka</h3>
+    <input type="checkbox" @onclick="() => { _orderByKidInHand = !_orderByKidInHand; }" checked=@_orderByKidInHand/>
+    <span>Řazení dle prvního sloupce</span>
 
-    <table>
+    <table class="fancy-table">
         <thead>
         <tr>
-            <td colspan="2">Dítě má v ruce</td>
-            <td colspan="2">Dítě chce</td>
+            <td colspan="3">Dítě má v ruce</td>
+            <td colspan="3">Dítě chce</td>
         </tr>
         </thead>
+
         <tr
+            class="no-border-right"
             style=@(_currentKingdom.GetHomeResource().Amount <= Resource.HomeResourceAmountFreeMoreThan ? "background-color: lightcoral" : "background-color: lightgreen")
-            >
-            <td>1x @_currentKingdom.GetHomeResource().Name</td>
+        >
+            <td colspan="2">NIC!</td>
             <td> -></td>
+            <td>1x</td>
             <td>
-                @if (_currentKingdom.GetHomeResource().Amount > Resource.HomeResourceAmountFreeMoreThan)
-                {
-                    <span style="color: green; font-size: x-small">ZDARMA</span>
-                }
-                else
-                {
-                    <span style="color: red; font-size: x-small">NEDOSTATEK</span>
-                }
+                @_currentKingdom.GetHomeResource().Name
             </td>
             <td>
                 <button @onclick="() => UpdateKingdom(_currentKingdom.GetHomeResource().Name, -1)"
@@ -55,69 +53,74 @@
                 </button>
             </td>
         </tr>
-        @foreach (var offeredResource in _currentKingdom.Resources)
-        {
-            @foreach (var targetResource in _currentKingdom.Resources)
-            {
-                @if (offeredResource.Name != targetResource.Name && offeredResource.GetExchangeRate(targetResource) != 0)
-                {
-                    <tr style=@(offeredResource.GetExchangeRate(targetResource) > 0? "background-color: lightgreen" : "background-color: lightcoral") >
-                        @if (offeredResource.GetExchangeRate(targetResource) > 0)
-                        {
-                            <td>1x @offeredResource.Name</td>
-                        }
-                        else
-                        {
-                            <td>@(offeredResource.GetExchangeRate(targetResource) * -1)x @offeredResource.Name</td>
-                        }
 
-                        <td>-></td>
-                        @if (offeredResource.GetExchangeRate(targetResource) > 0)
-                        {
-                            <td>@(offeredResource.GetExchangeRate(targetResource))x @targetResource.Name</td>
-                        }
-                        else
-                        {
-                            <td>1x @targetResource.Name</td>
-                        }
-                        <td>
-                            <button
-                                @onclick="async () => { 
-                                    if (offeredResource.GetExchangeRate(targetResource) > 0) {
-                                        await UpdateKingdom(offeredResource.Name, 1);
-                                        await UpdateKingdom(targetResource.Name, offeredResource.GetExchangeRate(targetResource)*-1); 
-                                    }else { 
-                                        await UpdateKingdom(offeredResource.Name, offeredResource.GetExchangeRate(targetResource)*-1);
-                                        await UpdateKingdom(targetResource.Name, -1); 
-                                    } }"
-                            >Prodat
-                            </button>
-                        </td>
-                    </tr>
+        @if (_orderByKidInHand)
+        {
+            @foreach (var offeredResource in _currentKingdom.Resources)
+            {
+                <tr>
+                    <td colspan="6"></td>
+                </tr>
+                @foreach (var targetResource in _currentKingdom.Resources)
+                {
+                    <ExchangeTableRow CurrentKingdom="_currentKingdom"
+                                      OfferedResource="offeredResource"
+                                      Parent="this"
+                                      TargetResource="targetResource"/>
                 }
             }
         }
+        else
+        {
+            @foreach (var targetResource in _currentKingdom.Resources)
+            {
+                <tr>
+                    <td colspan="6"></td>
+                </tr>
+                @foreach (var offeredResource in _currentKingdom.Resources)
+                {
+                    <ExchangeTableRow CurrentKingdom="_currentKingdom"
+                                      OfferedResource="offeredResource"
+                                      Parent="this"
+                                      TargetResource="targetResource"/>
+                }
+            }
+        }
+
     </table>
 
     <hr/>
 
     <h3>Můj sklad</h3>
 
-    <table>
+    <table class="fancy-table">
         @foreach (var resource in _currentKingdom.Resources)
         {
             <tr>
                 <td>@resource.Name</td>
                 <td>
                     <button
+                        @onclick="() => UpdateKingdom(resource.Name, -5)">-5
+                    </button>
+                </td>
+                <td>
+                    <button
                         @onclick="() => UpdateKingdom(resource.Name, -1)">-1
                     </button>
+                </td>
+                <td>
                     @resource.Amount
+                </td>
+                <td>
                     <button
                         @onclick="() => UpdateKingdom(resource.Name, +1)">+1
                     </button>
                 </td>
-
+                <td>
+                    <button
+                        @onclick="() => UpdateKingdom(resource.Name, +5)">+5
+                    </button>
+                </td>
             </tr>
         }
     </table>
@@ -133,6 +136,7 @@ else
 }
 
 @code {
+    private bool _orderByKidInHand = true;
     private int _selectedKingdomIndex = 0;
     private Kingdom _currentKingdom => _gameData.Kingdoms[_selectedKingdomIndex];
     private HubConnection? hubConnection;
@@ -164,7 +168,7 @@ else
         }
     }
 
-    private async Task UpdateKingdom(string resourceName, int amount)
+    public async Task UpdateKingdom(string resourceName, int amount)
     {
         // Make sure we don't set the resource to negative numbers
         if (_currentKingdom.Resources.First(r => r.Name == resourceName).Amount == 0 && amount == -1)
