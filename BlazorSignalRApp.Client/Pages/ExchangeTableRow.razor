@@ -15,7 +15,7 @@
             <td>@OfferedResource.Name</td>
         }
 
-        <td>-></td>
+        <td>=></td>
         @if (Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount) > 0)
         {
             <td>@(Parent._gameData.GetExchangeRate(OfferedResource.Amount, TargetResource.Amount))x</td>

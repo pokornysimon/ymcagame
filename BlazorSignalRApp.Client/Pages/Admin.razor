@@ -127,8 +127,9 @@
     </table>
     
     <hr/>
-
-    <button @onclick="ResetGame">Nastavit výchozí hodnoty - vynuluje aktuální stav!!!</button>
+    <input type="checkbox" checked=@_resetEnabled @onclick="() => _resetEnabled = !_resetEnabled" /><span>Povolit vynulování stavu</span>
+    <input type="checkbox" checked=@_resetEnabled2 @onclick="() => _resetEnabled2 = !_resetEnabled2" /><span>Povolit vynulování stavu</span>
+    <button @onclick="ResetGame" disabled=@(!_resetEnabled || !_resetEnabled2)>Nastavit výchozí hodnoty - vynuluje aktuální stav!!!</button>
 
     <hr/>
 
@@ -140,6 +141,8 @@
     private GameData _gameData = new GameData();
     private string? userInput;
     private string? messageInput;
+    private bool _resetEnabled = false;
+    private bool _resetEnabled2 = false;
 
     protected override async Task OnInitializedAsync()
     {

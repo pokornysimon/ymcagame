@@ -9,7 +9,7 @@
 
 @if (IsConnected && _gameData.LastUpdated > DateTime.Today)
 {
-    <h3>Výběr království</h3>
+    <h4>Výběr království</h4>
     <div class="form-group">
         <label>
             Moje království:
@@ -24,6 +24,10 @@
 
     <hr/>
 
+    <h1>@_currentKingdom.KingdomName | @_currentKingdom.GetHomeResource().Name</h1>
+    
+    <hr/>
+    
     <h3>Obchodní tabulka</h3>
     <input type="checkbox" @onclick="() => { _orderByKidInHand = !_orderByKidInHand; }" checked=@_orderByKidInHand/>
     <span>Řazení dle prvního sloupce</span>
@@ -41,7 +45,7 @@
             style=@(_currentKingdom.GetHomeResource().Amount <= _gameData.HomeResourceAmountFreeMoreThan ? "background-color: lightcoral" : "background-color: lightgreen")
         >
             <td colspan="2">NIC!</td>
-            <td> -></td>
+            <td> =></td>
             <td>@(_gameData.HomeResourceAmountFree)x</td>
             <td>
                 @_currentKingdom.GetHomeResource().Name

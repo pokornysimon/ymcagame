@@ -8,7 +8,7 @@ public class GameData
     public int ExRateMed { get; set; } = 20;
     public int ExRateHighAmount { get; set; } = 3;
     
-    public int HomeResourceAmountFreeMoreThan = 30;
+    public int HomeResourceAmountFreeMoreThan { get; set; } = 30;
     public int HomeResourceAmountFree { get; set; } = 1;
 
     public DateTime LastUpdated { get; set; } = DateTime.MinValue;
