@@ -12,7 +12,6 @@ internal class GameDataHub(GameDataService gameDataService) : Hub
         gameDataService.GameData.LastUpdated = DateTime.Now;
         var kingdom = gameDataService.GameData.Kingdoms.First(k => k.KingdomName == updateContract.KingdomName);
         kingdom.UpdateResource(updateContract.ResourceName, updateContract.Amount);
-        kingdom.RecalculateResourceValues();
         
         await Clients.All.SendAsync("NewGameData", gameDataService.GameData);
     }

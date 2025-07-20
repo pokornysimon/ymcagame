@@ -36,23 +36,40 @@
             <td></td>
             @foreach (var resource in _currentKingdom.Resources)
             {
-                <td>@resource.Name</td>
+                <td>
+                    @resource.Name
+
+                </td>
             }
         </tr>
 
-        @foreach (var wantResource in _currentKingdom.Resources)
+        @foreach (var offeredResource in _currentKingdom.Resources)
         {
             <tr>
 
-                <td><b>@wantResource.Name</b> <span style="font-size: 10px">[@wantResource.Value]</span></td>
-                @foreach (var offerResource in _currentKingdom.Resources)
+                <td>
+                    1x <b>@offeredResource.Name</b>
+                    @if (offeredResource.Amount > Kingdom.HomeResourceAmountFreeMoreThan)
+                    {
+                        <span style="color: red; font-size: x-small">ZDARMA</span>
+                    }
+                </td>
+                @foreach (var targetResource in _currentKingdom.Resources)
                 {
-                    if (wantResource.Name != offerResource.Name)
+                    if (offeredResource.Name != targetResource.Name)
                     {
                         <td>
-                            @if (offerResource.Amount != 0 && offerResource.Value != 0)
+                            @if (targetResource.Amount != 0)
                             {
-                                @_currentKingdom.GetExchangeAmount(wantResource.Name, offerResource.Name)
+                                if (@_currentKingdom.GetExchangeAmount(offeredResource.Name, targetResource.Name) < 1)
+                                {
+                                    <span>1/</span>
+                                    @(_currentKingdom.GetExchangeAmount(offeredResource.Name, targetResource.Name) * -1)
+                                }
+                                else
+                                {
+                                    @_currentKingdom.GetExchangeAmount(offeredResource.Name, targetResource.Name)
+                                }
                             }
                             else
                             {
@@ -72,35 +89,33 @@
     <hr/>
 
     <h3>Můj sklad</h3>
-    
+
     <table>
         @foreach (var resource in _currentKingdom.Resources)
-        {           
-        <tr>
-            <td>@resource.Name</td>
-            <td>
-                <button
-                    @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, -1)">-1
-                </button>
-                @resource.Amount
-                <button
-                    @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, +1)">+1
-                </button>
-            </td>
+        {
+            <tr>
+                <td>@resource.Name</td>
+                <td>
+                    <button
+                        @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, -1)">-1
+                    </button>
+                    @resource.Amount
+                    <button
+                        @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, +1)">+1
+                    </button>
+                </td>
 
-        </tr>       
+            </tr>
         }
     </table>
-    
-   
-    <hr />
-    
+
+
+    <hr/>
+
     <p>Poslendí změna: @_gameData.LastUpdated.ToLongTimeString()</p>
 }
 else
 {
-    
-
     <p>Chvilku strpení - načítám data :)</p>
 }
 
@@ -143,14 +158,14 @@ else
         {
             return;
         }
-        
+
         var updateContract = new GameDataUpdateContract
         {
             KingdomName = _currentKingdom.KingdomName,
             ResourceName = resourceName,
             Amount = amount
         };
-        
+
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("UpdateGameData", updateContract);
