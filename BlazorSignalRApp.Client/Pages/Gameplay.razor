@@ -24,65 +24,78 @@
 
     <hr/>
 
-    <h3>Cena surovin</h3>
+    <h3>Obchodní tabulka</h3>
+
     <table>
+        <thead>
         <tr>
-            <td colspan="2" rowspan="1"></td>
-            <td colspan="6">VYDÁM</td>
+            <td colspan="2">Dítě má v ruce</td>
+            <td colspan="2">Dítě chce</td>
         </tr>
-        <tr>
-
-            <td rowspan="6">DOSTANU</td>
-            <td></td>
-            @foreach (var resource in _currentKingdom.Resources)
-            {
-                <td>
-                    @resource.Name
-
-                </td>
-            }
+        </thead>
+        <tr
+            style=@(_currentKingdom.GetHomeResource().Amount <= Resource.HomeResourceAmountFreeMoreThan ? "background-color: lightcoral" : "background-color: lightgreen")
+            >
+            <td>1x @_currentKingdom.GetHomeResource().Name</td>
+            <td> -></td>
+            <td>
+                @if (_currentKingdom.GetHomeResource().Amount > Resource.HomeResourceAmountFreeMoreThan)
+                {
+                    <span style="color: green; font-size: x-small">ZDARMA</span>
+                }
+                else
+                {
+                    <span style="color: red; font-size: x-small">NEDOSTATEK</span>
+                }
+            </td>
+            <td>
+                <button @onclick="() => UpdateKingdom(_currentKingdom.GetHomeResource().Name, -1)"
+                        disabled=@(_currentKingdom.GetHomeResource().Amount <= Resource.HomeResourceAmountFreeMoreThan)>
+                    Vydat zdarma
+                </button>
+            </td>
         </tr>
-
         @foreach (var offeredResource in _currentKingdom.Resources)
         {
-            <tr>
-
-                <td>
-                    1x <b>@offeredResource.Name</b>
-                    @if (offeredResource.Amount > Kingdom.HomeResourceAmountFreeMoreThan)
-                    {
-                        <span style="color: red; font-size: x-small">ZDARMA</span>
-                    }
-                </td>
-                @foreach (var targetResource in _currentKingdom.Resources)
+            @foreach (var targetResource in _currentKingdom.Resources)
+            {
+                @if (offeredResource.Name != targetResource.Name && offeredResource.GetExchangeRate(targetResource) != 0)
                 {
-                    if (offeredResource.Name != targetResource.Name)
-                    {
+                    <tr style=@(offeredResource.GetExchangeRate(targetResource) > 0? "background-color: lightgreen" : "background-color: lightcoral") >
+                        @if (offeredResource.GetExchangeRate(targetResource) > 0)
+                        {
+                            <td>1x @offeredResource.Name</td>
+                        }
+                        else
+                        {
+                            <td>@(offeredResource.GetExchangeRate(targetResource) * -1)x @offeredResource.Name</td>
+                        }
+
+                        <td>-></td>
+                        @if (offeredResource.GetExchangeRate(targetResource) > 0)
+                        {
+                            <td>@(offeredResource.GetExchangeRate(targetResource))x @targetResource.Name</td>
+                        }
+                        else
+                        {
+                            <td>1x @targetResource.Name</td>
+                        }
                         <td>
-                            @if (targetResource.Amount != 0)
-                            {
-                                if (@_currentKingdom.GetExchangeAmount(offeredResource.Name, targetResource.Name) < 1)
-                                {
-                                    <span>1/</span>
-                                    @(_currentKingdom.GetExchangeAmount(offeredResource.Name, targetResource.Name) * -1)
-                                }
-                                else
-                                {
-                                    @_currentKingdom.GetExchangeAmount(offeredResource.Name, targetResource.Name)
-                                }
-                            }
-                            else
-                            {
-                                <span>0</span>
-                            }
+                            <button
+                                @onclick="async () => { 
+                                    if (offeredResource.GetExchangeRate(targetResource) > 0) {
+                                        await UpdateKingdom(offeredResource.Name, 1);
+                                        await UpdateKingdom(targetResource.Name, offeredResource.GetExchangeRate(targetResource)*-1); 
+                                    }else { 
+                                        await UpdateKingdom(offeredResource.Name, offeredResource.GetExchangeRate(targetResource)*-1);
+                                        await UpdateKingdom(targetResource.Name, -1); 
+                                    } }"
+                            >Prodat
+                            </button>
                         </td>
-                    }
-                    else
-                    {
-                        <td></td>
-                    }
+                    </tr>
                 }
-            </tr>
+            }
         }
     </table>
 
@@ -97,11 +110,11 @@
                 <td>@resource.Name</td>
                 <td>
                     <button
-                        @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, -1)">-1
+                        @onclick="() => UpdateKingdom(resource.Name, -1)">-1
                     </button>
                     @resource.Amount
                     <button
-                        @onclick="() => UpdateKingdom(_selectedKingdomIndex, resource.Name, +1)">+1
+                        @onclick="() => UpdateKingdom(resource.Name, +1)">+1
                     </button>
                 </td>
 
@@ -151,7 +164,7 @@ else
         }
     }
 
-    private async Task UpdateKingdom(int kingdomIndex, string resourceName, int amount)
+    private async Task UpdateKingdom(string resourceName, int amount)
     {
         // Make sure we don't set the resource to negative numbers
         if (_currentKingdom.Resources.First(r => r.Name == resourceName).Amount == 0 && amount == -1)
