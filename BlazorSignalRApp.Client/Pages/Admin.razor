@@ -54,6 +54,58 @@
     </table>
 
     <hr/>
+    
+    <h3>Prahy</h3>
+    <table>
+        <tr>
+            
+            <th colspan="2">
+                Cena C1 při rozdílu =&lt; R1
+            </th>
+
+            <th colspan="2">
+                Cena C2 při rozdílu &gt; R1
+            </th>
+            <th>Cena C3 při rozdílu &gt; R2</th>
+            
+        </tr>
+        <tr>
+            <td>C1</td>
+            <td>R1</td>
+            <td>C2</td>
+            <td>R2</td>
+            <td>C3</td>
+        </tr>
+        <tr>
+            <td>
+                <button>-</button>
+                <span>@Resource.ExRateLowAmount</span>
+                <button>+</button>
+            </td>
+            <td>
+                <button>-</button>
+                <span>@Resource.ExRateLow</span>
+                <button>+</button>
+            </td>
+            <td>
+                <button>-</button>
+                <span>@Resource.ExRateMedAmount</span>
+                <button>+</button>
+            </td>
+            <td>
+                <button>-</button>
+                <span>@Resource.ExRateMed</span>
+                <button>+</button>
+            </td>
+            <td>
+                <button>-</button>
+                <span>@Resource.ExRateHighAmount</span>
+                <button>+</button>
+            </td>
+        </tr>
+    </table>
+    
+    <hr/>
 
     <button @onclick="ResetGame">Nastavit výchozí hodnoty - vynuluje aktuální stav!!!</button>
 
