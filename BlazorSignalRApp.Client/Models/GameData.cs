@@ -43,7 +43,7 @@ public class GameData
             [
                 new Resource { Name = "Oheň", Amount = 0 },
                 new Resource { Name = "Zlato", Amount = 0 },
-                new Resource { Name = "Obilí", Amount = 100, HomeResource = true },
+                new Resource { Name = "Obilí", Amount = 120, HomeResource = true },
                 new Resource { Name = "Mléko", Amount = 0 },
                 new Resource { Name = "Krystaly", Amount = 0 },
             ]
