@@ -15,7 +15,7 @@ public class GameData
 
     public List<Kingdom> Kingdoms { get; set; } =
     [
-        new Kingdom("Synové světla")
+        new Kingdom("[Cesta na skokánek] Synové světla")
         {
             Resources =
             [
@@ -26,7 +26,7 @@ public class GameData
                 new Resource { Name = "Krystaly", Amount = 0 },
             ]
         },
-        new Kingdom("Strážci hornin")
+        new Kingdom("[Pláž] Strážci hornin")
         {
             Resources =
             [
@@ -37,7 +37,7 @@ public class GameData
                 new Resource { Name = "Krystaly", Amount = 0 },
             ]
         },
-        new Kingdom("Strážci řemesel")
+        new Kingdom("[Pahorek] Strážci řemesel")
         {
             Resources =
             [
@@ -48,7 +48,7 @@ public class GameData
                 new Resource { Name = "Krystaly", Amount = 0 },
             ]
         },
-        new Kingdom("Strážci řeči")
+        new Kingdom("[Bažina] Strážci řeči")
         {
             Resources =
             [
@@ -59,7 +59,7 @@ public class GameData
                 new Resource { Name = "Krystaly", Amount = 0 },
             ]
         },
-        new Kingdom("Strážci lesů a půdy")
+        new Kingdom("[Kostel] Strážci lesů a půdy")
         {
             Resources =
             [
